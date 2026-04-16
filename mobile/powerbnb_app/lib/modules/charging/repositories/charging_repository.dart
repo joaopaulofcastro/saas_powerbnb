@@ -8,9 +8,13 @@ class ChargingRepository {
 
   Future<bool> registerPoint(ChargingPointRequest request) async {
     try {
-      final response = await _client.dio.post('/charging-points', data: request.toJson());
+      final response = await _client.dio.post(
+        '/bff/charging/charging-points',
+        data: request.toJson(),
+      );
       return response.statusCode == 201;
     } catch (e) {
+      print(e.toString());
       return false;
     }
   }

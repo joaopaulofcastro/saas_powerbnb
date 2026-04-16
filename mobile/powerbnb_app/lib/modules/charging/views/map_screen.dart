@@ -20,7 +20,10 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _loadMockMarkers();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMockMarkers();
+    });
   }
 
   void _loadMockMarkers() {

@@ -1,42 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:powerbnb_app/modules/charging/views/map_screen.dart';
+import 'package:powerbnb_app/infra/telemetry_setup.dart';
+import 'core/auth/auth_service.dart';
+import 'modules/auth/views/login_screen.dart';
+import 'modules/charging/views/map_screen.dart';
 
 void main() {
-  // Aqui poderias inicializar serviços globais (como o Firebase ou Injeção de Dependência)
-  runApp(const PowerBnbApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  configureOpenTelemetry();
+  runApp(const PowerBNBApp());
 }
 
-class PowerBnbApp extends StatelessWidget {
-  const PowerBnbApp({super.key});
+class PowerBNBApp extends StatelessWidget {
+  const PowerBNBApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PowerBNB',
       debugShowCheckedModeBanner: false,
-      
-      // Definição do Tema (Branding que definimos)
+      title: 'PowerBNB',
       theme: ThemeData(
+        primarySwatch: Colors.green,
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 46, 125, 50), // Verde Sustentável
-          brightness: Brightness.light,
-        ),
-        // Personalização global de botões e inputs
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(),
-          filled: true,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size.fromHeight(50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
       ),
+      // O FutureBuilder atua como o Guardião da Rota Inicial
+      home: FutureBuilder<bool>(
+        future: AuthService().isAuthenticated(),
+        builder: (context, snapshot) {
+          // 1. Enquanto a verificação no Secure Storage está em curso
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(color: Color(0xFF2E7D32)),
+              ),
+            );
+          }
 
-      // Define a tela de registo como a inicial para os nossos testes
-      home: const MapScreen(),
+          // 2. Se a autenticação for confirmada (Token existe e é válido)
+          if (snapshot.hasData && snapshot.data == true) {
+            return const MapScreen();
+          }
+
+          // 3. Caso contrário (ou se houver erro), redireciona para o Login
+          return const LoginScreen();
+        },
+      ),
     );
   }
 }

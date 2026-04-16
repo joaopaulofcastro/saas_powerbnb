@@ -12,9 +12,9 @@ class ApiClient {
 
   ApiClient() {
     String getBaseUrl() {
-      if (kIsWeb) return 'http://localhost:5046'; 
-      if (Platform.isAndroid) return 'http://192.168.0.71:5046';
-      return 'http://localhost:5046';
+      if (kIsWeb) return 'http://localhost:5276'; 
+      if (Platform.isAndroid) return 'http://192.168.0.71:5276';
+      return 'http://localhost:5276';
     }
 
     dio = Dio(BaseOptions(baseUrl: getBaseUrl()));
@@ -52,7 +52,7 @@ class ApiClient {
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         ),
         data: {
-          'client_id': 'powerbnb-app',
+          'client_id': 'powerbnb-api',
           'grant_type': 'password',
           'username': username,
           'password': password,
