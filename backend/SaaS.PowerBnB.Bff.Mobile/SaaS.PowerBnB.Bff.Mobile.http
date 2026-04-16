@@ -1,0 +1,6 @@
+@SaaS.PowerBNB.Bff.Mobile_HostAddress = http://localhost:5276
+
+GET {{SaaS.PowerBNB.Bff.Mobile_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

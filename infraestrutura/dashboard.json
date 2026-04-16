@@ -1,0 +1,41 @@
+{
+  "dashboard": {
+    "title": "PowerBnB - Saúde do Sistema",
+    "panels": [
+      {
+        "title": "Tempo Médio de Resposta (Módulos)",
+        "type": "graph",
+        "description": "Tempo que as APIs levam para responder (médio/p95)",
+        "metrics": [
+          "http_server_duration_milliseconds_bucket"
+        ]
+      },
+      {
+        "title": "PostgreSQL: Queries Lentas (> 500ms)",
+        "type": "table",
+        "description": "Lista de consultas que estão impactando a performance",
+        "query": "SELECT query, calls, total_exec_time / calls as avg_time FROM pg_stat_statements ORDER BY avg_time DESC LIMIT 5;"
+      },
+      {
+        "title": "Redis: Taxa de Cache Hit/Miss",
+        "type": "pie",
+        "description": "Eficácia do QueryCachingBehavior",
+        "metrics": [
+          "redis_cache_hits_total",
+          "redis_cache_misses_total"
+        ]
+      },
+      {
+        "title": "Outbox: Mensagens Pendentes",
+        "type": "stat",
+        "description": "Mensagens na fila de processamento",
+        "query": "SELECT count(*) FROM charging.outbox_messages WHERE processed_on_utc IS NULL;"
+      }
+    ]
+  },
+  "status_check": {
+    "redis": "Connected (localhost:6379)",
+    "postgres": "Connected (PowerBnbDb)",
+    "open_telemetry": "Active (Exporting to Jaeger/Grafana)"
+  }
+}

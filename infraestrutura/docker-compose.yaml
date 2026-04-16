@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL + PostGIS
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: powerbnb_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: PowerBnb2026!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+  # 2. Redis
+  redis:
+    image: redis:7-alpine
+    container_name: powerbnb_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # 3. Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.2
+    container_name: powerbnb_keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: PowerBnb2026!
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  # ==========================================
+  # STACK DE OBSERVABILIDADE + LOGS
+  # ==========================================
+
+  # 4. OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:0.97.0
+    container_name: powerbnb_otel_collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    depends_on:
+      - jaeger
+      - loki
+
+  # 5. Jaeger (Traces)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: powerbnb_jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+
+  # 6. Prometheus (Métricas)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: powerbnb_prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  # 7. Loki (Logs)
+  loki:
+    image: grafana/loki:latest
+    container_name: powerbnb_loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  # 8. Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: powerbnb_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+      - jaeger
+      - loki
+
+  # ==========================================
+  # FERRAMENTAS DE DESENVOLVIMENTO
+  # ==========================================
+
+  # 9. SMTP4Dev (Teste de E-mail)
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: powerbnb_smtp4dev
+    ports:
+      - "5000:80"   # Interface Web
+      - "2525:25"   # Porta SMTP
+    environment:
+      - ServerOptions__EnabledSslProtocols=None
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/01 - Hosts/">
+    <Project Path="SaaS.PowerBnB.Api/SaaS.PowerBnB.Api.csproj" />
+    <Project Path="SaaS.PowerBNB.Bff.Mobile/SaaS.PowerBnB.Bff.Mobile.csproj" Id="cc31456b-cb3e-4641-82d2-1f7200a566da" />
+  </Folder>
+  <Folder Name="/02 - Modules/">
+    <Project Path="SaaS.PowerBnB.Modules.Charging/SaaS.PowerBnB.Modules.Charging.csproj" />
+  </Folder>
+  <Folder Name="/03 - Common/">
+    <Project Path="SaaS.PowerBnB.SharedKernel/SaaS.PowerBnB.SharedKernel.csproj" />
+  </Folder>
+</Solution>
