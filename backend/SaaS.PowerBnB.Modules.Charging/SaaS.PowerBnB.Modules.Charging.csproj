@@ -9,6 +9,7 @@
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="10.0.1" />
 		<PackageReference Include="OneOf" Version="3.0.271" />
+		<PackageReference Include="OpenTelemetry.Api" Version="1.15.2" />
 		<PackageReference Include="Scrutor" Version="7.0.0" />
 	</ItemGroup>
 

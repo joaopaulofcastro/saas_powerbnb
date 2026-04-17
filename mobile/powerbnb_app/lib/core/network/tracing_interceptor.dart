@@ -1,7 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:opentelemetry/api.dart';
 
+// Implementação concreta do TextMapSetter para os headers do Dio
+class _DioHeadersSetter implements TextMapSetter<Map<String, dynamic>> {
+  const _DioHeadersSetter();
+
+  @override
+  void set(Map<String, dynamic> carrier, String key, String value) {
+    carrier[key] = value;
+  }
+}
+
 class TracingInterceptor extends Interceptor {
+  static const _setter = _DioHeadersSetter();
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final tracer = globalTracerProvider.getTracer('http-client');
@@ -16,13 +28,11 @@ class TracingInterceptor extends Interceptor {
     span.setAttribute(Attribute.fromString('http.method', options.method));
     span.setAttribute(Attribute.fromString('http.url', options.uri.toString()));
 
-    // 3. INJETA O TRACEPARENT (A Mágica acontece aqui!)
+    // 3. INJETA O TRACEPARENT
     globalTextMapPropagator.inject(
       contextWithSpan(Context.current, span),
       options.headers,
-      (carrier, key, value) {
-        carrier[key] = value; 
-      } as TextMapSetter<dynamic>,
+      _setter,
     );
 
     // Salva o span para fechar depois

@@ -65,6 +65,9 @@ services:
     container_name: powerbnb_jaeger
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+    volumes:
+      - ./jaeger-ui.json:/etc/jaeger/jaeger-ui.json  
+    command: ["--query.ui-config", "/etc/jaeger/jaeger-ui.json"]
     ports:
       - "16686:16686"
 

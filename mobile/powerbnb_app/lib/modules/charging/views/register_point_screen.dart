@@ -43,10 +43,9 @@ class _RegisterPointScreenState extends State<RegisterPointScreen> {
 
   void _submit() async {
   if (_formKey.currentState!.validate()) {
-    setState(() => _isLoading = true); // Adicione um bool _isLoading no State
+    setState(() => _isLoading = true);
 
     try {
-      // Usamos a instância do ApiClient que já tem o Interceptor de Token
       final repo = ChargingRepository(ApiClient());
 
       final request = ChargingPointRequest(

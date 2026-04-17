@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:powerbnb_app/core/network/tracing_interceptor.dart';
 
 import '../../main.dart';
 import '../../modules/auth/views/login_screen.dart';
@@ -70,6 +71,7 @@ class ApiClient {
         },
       ),
     );
+    dio.interceptors.add(TracingInterceptor());
   }
 
   Future<bool> _refreshToken() async {
@@ -82,8 +84,8 @@ class ApiClient {
       final refreshToken = await _storage.read(key: 'refresh_token');
       if (refreshToken == null) return false;
 
-      final String realm = "powerbnb-app";
-      final String host = Platform.isAndroid ? '10.0.2.2' : 'localhost';
+      final String realm = "powerbnb";
+      final String host = Platform.isAndroid ? '10.0.2.2' : '192.168.0.71';
       final String url =
           'http://$host:8080/realms/$realm/protocol/openid-connect/token';
 
@@ -93,7 +95,7 @@ class ApiClient {
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         ),
         data: {
-          'client_id': 'powerbnb-mobile',
+          'client_id': 'powerbnb-api',
           'grant_type': 'refresh_token',
           'refresh_token': refreshToken,
         },
@@ -119,10 +121,9 @@ class ApiClient {
     }
   }
 
-  // --- MÉTODO DE LOGIN (O QUE ESTAVA FALTANDO) ---
+  // --- MÉTODO DE LOGIN
   Future<bool> login(String username, String password) async {
     try {
-      // Ajuste conforme o seu novo Realm 'powerbnb-app'
       final String realm = "powerbnb";
       final String host = Platform.isAndroid ? '10.0.2.2' : '192.168.0.71';
       final String url =
@@ -138,7 +139,6 @@ class ApiClient {
           'grant_type': 'password',
           'username': username,
           'password': password,
-          // 'client_secret': 'SEU_SECRET_SE_O_CLIENT_NAO_FOR_PUBLIC',
         },
       );
 
