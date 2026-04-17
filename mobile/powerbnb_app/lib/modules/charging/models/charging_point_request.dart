@@ -5,6 +5,7 @@ class ChargingPointRequest {
   final double lon;
   final double maxPowerKw;
   final int connectorType;
+  final String hostId;
 
   ChargingPointRequest({
     required this.title,
@@ -13,6 +14,7 @@ class ChargingPointRequest {
     required this.lon,
     required this.maxPowerKw,
     required this.connectorType,
+    required this.hostId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -22,5 +24,6 @@ class ChargingPointRequest {
     'lon': lon,
     'maxPowerKw': maxPowerKw,
     'connectorType': connectorType,
+    'hostId': hostId
   };
 }

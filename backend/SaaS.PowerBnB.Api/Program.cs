@@ -30,8 +30,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // 1. OpenTelemetry
-var serviceName = builder.Configuration.GetValue<string>("OpenTelemetry:ServiceName") ?? "SaaS.PowerBnB.Api";
-var otlpEndpoint = builder.Configuration.GetValue<string>("OpenTelemetry:Endpoint") ?? "http://127.0.0.1:4317";
+var serviceName = builder.Configuration.GetValue<string>("OpenTelemetry:ServiceName")!;
+var otlpEndpoint = builder.Configuration.GetValue<string>("OpenTelemetry:Endpoint")!;
 
 Action<ResourceBuilder> configureResource = r => r.AddService(serviceName);
 
@@ -49,6 +49,7 @@ builder.Services.AddOpenTelemetry()
         })); // Exporta para Jaeger/Grafana
 
 builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 builder.Logging.AddOpenTelemetry(options =>
 {
     var resourceBuilder = ResourceBuilder.CreateDefault();
@@ -67,19 +68,21 @@ builder.Logging.AddOpenTelemetry(options =>
 // 2. Auth com Keycloak
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
+        var validIssuers = builder.Configuration.GetSection("Authentication:Keycloak:ValidIssuers").Get<string[]>();
+
         options.Authority = builder.Configuration["Authentication:Keycloak:Authority"];
         options.Audience = builder.Configuration["Authentication:Keycloak:Audience"];
         options.RequireHttpsMetadata = bool.Parse(builder.Configuration["Authentication:Keycloak:RequireHttpsMetadata"]!);
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Authentication:Keycloak:Authority"],
-
+            ValidateLifetime = true,
             ValidateAudience = true,
             // O Keycloak costuma usar 'account' como audience padrão | Azure api://CLIENT_ID (necessário "expor" a API)
             ValidAudience = builder.Configuration["Authentication:Keycloak:Audience"],
 
-            ValidateLifetime = true
+            ValidateIssuer = true,
+            ValidIssuers = validIssuers,
+            ValidateIssuerSigningKey = true
         };
     });
 

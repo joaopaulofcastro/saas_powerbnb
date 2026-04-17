@@ -23,6 +23,9 @@ internal class RegisterPointEndpoint : IEndpoint
             );
         })
         .WithTags("Charging Points")
+        .Produces<Guid>(StatusCodes.Status201Created)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
         .RequireAuthorization();
     }
 }

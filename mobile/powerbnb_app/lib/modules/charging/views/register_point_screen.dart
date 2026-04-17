@@ -56,6 +56,7 @@ class _RegisterPointScreenState extends State<RegisterPointScreen> {
         lon: double.parse(_lngController.text),
         maxPowerKw: double.parse(_powerController.text),
         connectorType: 1, // Poderia vir de um Dropdown futuramente
+        hostId: '00000000-0000-0000-0000-000000000000',
       );
 
       final success = await repo.registerPoint(request);
@@ -117,8 +118,11 @@ class _RegisterPointScreenState extends State<RegisterPointScreen> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submit,
-                child: const Text("Registrar no SaaS"),
+                onPressed: _isLoading ? null : _submit, // Desabilita o clique enquanto carrega
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
+                child: _isLoading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text("Registrar Ponto", style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

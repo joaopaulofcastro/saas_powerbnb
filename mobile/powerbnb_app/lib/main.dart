@@ -10,12 +10,15 @@ void main() {
   runApp(const PowerBNBApp());
 }
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class PowerBNBApp extends StatelessWidget {
   const PowerBNBApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'PowerBNB',
       theme: ThemeData(
