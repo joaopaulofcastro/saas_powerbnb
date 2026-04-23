@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -25,6 +26,19 @@ builder.Services.AddOpenTelemetry()
             {
                 opts.Endpoint = new Uri(otlpEndpoint);
             });
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddMeter("Microsoft.AspNetCore.Hosting")             // Requisições de entrada, RPS, Erros 500
+            .AddMeter("Microsoft.AspNetCore.Server.Kestrel")     // Métricas do servidor web
+            .AddMeter("System.Net.Http")                        // Substitui o HttpClient (Requisições de saída)
+            .AddRuntimeInstrumentation()                       // CPU e RAM
+            .AddMeter("SaaS.PowerBnB.Metrics.Outbox") // O nosso Meter customizado!
+            .AddOtlpExporter(opts =>
+            {
+                opts.Endpoint = new Uri(otlpEndpoint);
+            }); // Envia para o OTel Collector
     });
 
 builder.Logging.ClearProviders();

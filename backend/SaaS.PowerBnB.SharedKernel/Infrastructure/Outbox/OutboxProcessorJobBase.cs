@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 
 namespace SaaS.PowerBnB.SharedKernel.Infrastructure.Outbox;
@@ -15,16 +16,26 @@ public abstract class OutboxProcessorJobBase<TContext> : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _logger;
 
+    private readonly ActivitySource _activitySource;
+    private readonly string _contextName;
+
+
     protected OutboxProcessorJobBase(IServiceProvider serviceProvider, ILogger logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+
+        _contextName = typeof(TContext).Name;
+        _activitySource = new ActivitySource($"SaaS.PowerBnB.Outbox.{_contextName}");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            using var activity = _activitySource.StartActivity("Process Outbox Queue", ActivityKind.Internal);
+            activity?.SetTag("outbox.context", _contextName);
+
             try
             {
                 using var scope = _serviceProvider.CreateScope();
@@ -37,8 +48,12 @@ public abstract class OutboxProcessorJobBase<TContext> : BackgroundService
                 var messages = await dbContext.Set<OutboxMessage>()
                     .Where(m => m.ProcessedOnUtc == null)
                     .OrderBy(m => m.OccurredOnUtc)
-                    .Take(20)
                     .ToListAsync(stoppingToken);
+
+                int pendingCount = messages.Count();
+
+                // 3. Atualiza a métrica para o Prometheus raspar
+                OutboxMetrics.UpdatePendingRecords(_contextName, messages.Count);
 
                 foreach (var message in messages)
                 {

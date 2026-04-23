@@ -5,6 +5,8 @@ services:
   postgres:
     image: postgis/postgis:15-3.3
     container_name: powerbnb_postgres
+    networks:
+      - powerbnb_net
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: PowerBnb2026!
@@ -18,6 +20,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: powerbnb_redis
+    networks:
+      - powerbnb_net
     ports:
       - "6379:6379"
     volumes:
@@ -27,6 +31,8 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.2
     container_name: powerbnb_keycloak
+    networks:
+      - powerbnb_net
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
@@ -46,8 +52,10 @@ services:
 
   # 4. OpenTelemetry Collector
   otel-collector:
-    image: otel/opentelemetry-collector:0.97.0
+    image: otel/opentelemetry-collector-contrib:0.97.0
     container_name: powerbnb_otel_collector
+    networks:
+      - powerbnb_net
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
@@ -63,6 +71,8 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: powerbnb_jaeger
+    networks:
+      - powerbnb_net
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     volumes:
@@ -75,6 +85,8 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: powerbnb_prometheus
+    networks:
+      - powerbnb_net
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -84,6 +96,8 @@ services:
   loki:
     image: grafana/loki:latest
     container_name: powerbnb_loki
+    networks:
+      - powerbnb_net
     command: -config.file=/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
@@ -92,30 +106,66 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: powerbnb_grafana
+    networks:
+      - powerbnb_net
     ports:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
       - jaeger
       - loki
 
   # ==========================================
-  # FERRAMENTAS DE DESENVOLVIMENTO
+  # EXPORTERS DE INFRAESTRUTURA
   # ==========================================
 
-  # 9. SMTP4Dev (Teste de E-mail)
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: powerbnb_postgres_exporter
+    networks:
+      - powerbnb_net
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:PowerBnb2026!@postgres:5432/postgres?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: powerbnb_redis_exporter
+    networks:
+      - powerbnb_net
+    command: 
+      - '--redis.addr=redis://redis:6379'
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis
+
+  # 9. SMTP4Dev
   smtp4dev:
     image: rnwood/smtp4dev:latest
     container_name: powerbnb_smtp4dev
+    networks:
+      - powerbnb_net
     ports:
-      - "5000:80"   # Interface Web
-      - "2525:25"   # Porta SMTP
+      - "5000:80"
+      - "2525:25"
     environment:
       - ServerOptions__EnabledSslProtocols=None
+
+# CONFIGURAÇÃO DE REDE E VOLUMES
+networks:
+  powerbnb_net:
+    driver: bridge
 
 volumes:
   postgres_data:
   redis_data:
+  grafana_data:

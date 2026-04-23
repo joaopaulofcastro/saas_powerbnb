@@ -19,7 +19,7 @@ class ApiClient {
   ApiClient() {
     String getBaseUrl() {
       if (kIsWeb) return 'http://localhost:5276';
-      if (Platform.isAndroid) return 'http://192.168.0.71:5276';
+      if (Platform.isAndroid) return 'http://10.0.2.2:5276';
       return 'http://localhost:5276';
     }
 

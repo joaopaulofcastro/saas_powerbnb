@@ -8,7 +8,8 @@ namespace SaaS.PowerBnB.Modules.Charging.Infrastructure.Workers;
 
 internal class ChargingOutboxWorker : OutboxProcessorJobBase<ChargingDbContext>
 {
-    private static readonly ActivitySource _activitySource = new("SaaS.PowerBnB.Modules.Charging");
+    public static readonly string ActivitySourceName = "SaaS.PowerBnB.Modules.Charging";
+    private static readonly ActivitySource _activitySource = new(ActivitySourceName);
 
     public ChargingOutboxWorker(IServiceProvider serviceProvider, ILogger<ChargingOutboxWorker> logger)
         : base(serviceProvider, logger)

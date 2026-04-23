@@ -3,7 +3,7 @@ import 'package:opentelemetry/sdk.dart';
 
 void configureOpenTelemetry() {
   final exporter = CollectorExporter(
-    Uri.parse('http://172.168.0.71:5276/v1/traces'), // 10.0.2.2 é o localhost do emulador Android
+    Uri.parse('http://10.0.2.2:5276/v1/traces'), // 10.0.2.2 é o localhost do emulador Android
   );
 
   final processor = BatchSpanProcessor(exporter);
