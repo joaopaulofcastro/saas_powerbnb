@@ -31,6 +31,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SaaS.PowerBnB.Modules.Charging\SaaS.PowerBnB.Modules.Charging.csproj" />
+    <ProjectReference Include="..\SaaS.PowerBnB.Modules.Identity\SaaS.PowerBnB.Modules.Identity.csproj" />
+    <ProjectReference Include="..\SaaS.PowerBnB.Modules.Financial\SaaS.PowerBnB.Modules.Financial.csproj" />
     <ProjectReference Include="..\SaaS.PowerBnB.SharedKernel\SaaS.PowerBnB.SharedKernel.csproj" />
   </ItemGroup>
 

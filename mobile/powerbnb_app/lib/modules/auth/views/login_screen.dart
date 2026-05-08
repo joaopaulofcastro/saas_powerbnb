@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/network/api_client.dart';
 import '../../charging/views/map_screen.dart';
 
@@ -18,6 +21,31 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePass = true;
   final ApiClient _apiClient = ApiClient();
+
+  /// Monta a URL de registro do Keycloak resolvendo o host por plataforma
+  String _getRegistrationUrl() {
+    final String host = kIsWeb
+        ? 'localhost'
+        : Platform.isAndroid
+            ? '10.0.2.2'
+            : 'localhost';
+    return 'http://$host:8080/realms/powerbnb/protocol/openid-connect/registrations';
+  }
+
+  /// Abre o browser externo com a página de registro do Keycloak
+  Future<void> _handleRegister() async {
+    final url = Uri.parse(_getRegistrationUrl());
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível abrir a página de registro.'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   /// Executa a lógica de autenticação via BFF -> Keycloak
   Future<void> _handleLogin() async {
@@ -182,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Text("Não tem uma conta?"),
                     TextButton(
-                      onPressed: () {}, // Navegação para tela de Cadastro
+                      onPressed: _handleRegister, // Sempre habilitado, independente de _isLoading
                       child: const Text(
                         "Registe-se",
                         style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor),

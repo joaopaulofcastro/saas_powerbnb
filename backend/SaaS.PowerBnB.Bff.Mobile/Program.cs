@@ -4,6 +4,9 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Diagnostics;
+
+System.Diagnostics.DistributedContextPropagator.Current = DistributedContextPropagator.CreateDefaultPropagator();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +23,8 @@ builder.Services.AddOpenTelemetry()
     {
         tracerProviderBuilder
             .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
+            .AddAspNetCoreInstrumentation() // LÊ o trace do Flutter
+            .AddHttpClientInstrumentation() // PASSA o trace para o Back-end
             .AddOtlpExporter(opts =>
             {
                 opts.Endpoint = new Uri(otlpEndpoint);

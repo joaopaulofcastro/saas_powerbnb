@@ -13,5 +13,6 @@ public enum ChargerStatus
     Offline = 0,      // Disjuntor sem internet/desligado
     Available = 1,    // Online e pronto para uso
     Occupied = 2,     // Carro plugado e carregando
-    Maintenance = 3   // Anfitrião bloqueou para manutenção
+    Maintenance = 3,  // Anfitrião bloqueou para manutenção
+    Deactivated = 4   // Desativado permanentemente pelo host — não aparece nas buscas
 }

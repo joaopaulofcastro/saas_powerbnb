@@ -12,6 +12,7 @@ internal class ChargingDbContext : ModuleDbContextBase
     }
 
     public DbSet<ChargingPoint> ChargingPoints => Set<ChargingPoint>();
+    public DbSet<ChargingUser> ChargingUsers => Set<ChargingUser>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

@@ -110,6 +110,40 @@ namespace SaaS.PowerBnB.Modules.Charging.Migrations
                     b.ToTable("charging_points", "charging");
                 });
 
+            modelBuilder.Entity("SaaS.PowerBnB.Modules.Charging.Domain.Entities.ChargingUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_charging_users");
+
+                    b.ToTable("charging_users", "charging");
+                });
+
             modelBuilder.Entity("SaaS.PowerBnB.SharedKernel.Audit.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")

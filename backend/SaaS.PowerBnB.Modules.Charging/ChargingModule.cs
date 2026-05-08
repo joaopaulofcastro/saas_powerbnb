@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +9,7 @@ using SaaS.PowerBnB.Modules.Charging.Infrastructure.Data;
 using SaaS.PowerBnB.Modules.Charging.Infrastructure.Workers;
 using SaaS.PowerBnB.SharedKernel.Data;
 using SaaS.PowerBnB.SharedKernel.Endpoints;
+using SaaS.PowerBnB.SharedKernel.Infrastructure.Data;
 using SaaS.PowerBnB.SharedKernel.Infrastructure.Interceptors;
 
 namespace SaaS.PowerBnB.Modules.Charging;
@@ -56,11 +58,18 @@ public static class ChargingModule
         // 3. UnitOfWork acoplado ao banco do módulo
         services.AddScoped<IUnitOfWork<ChargingDbContext>, UnitOfWork<ChargingDbContext>>();
 
+        // 3.1 SqlExecutor (Dapper) para queries de leitura de alta performance (Query side do CQRS)
+        services.AddScoped(sp => new SqlExecutor(
+            configuration.GetConnectionString("PowerBnbDb")!));
+
         // 4. O Módulo registra seus PRÓPRIOS Handlers no MediatR
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(ChargingModule).Assembly);
         });
+
+        // 4.1 Validators do FluentValidation para o módulo
+        services.AddValidatorsFromAssembly(typeof(ChargingModule).Assembly, includeInternalTypes: true);
 
         // 5. O BEHAVIOR DE TRANSAÇÃO ESPECÍFICO DO MÓDULO 
         // Ele só vai interceptar classes que herdem de IChargingCommand.

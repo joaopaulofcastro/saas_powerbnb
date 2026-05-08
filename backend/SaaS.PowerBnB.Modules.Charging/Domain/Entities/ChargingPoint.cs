@@ -76,15 +76,42 @@ internal class ChargingPoint : AggregateRoot
         Status = ChargerStatus.Maintenance;
     }
 
-    public void UpdateDetails(string newTitle, double newLat, double newLon)
+    public void UpdateDetails(
+        string newTitle,
+        ConnectorType newConnector,
+        decimal newMaxPowerKw,
+        decimal newPricePerKwh)
     {
+        // Latitude e Longitude são imutáveis após o cadastro
         Title = newTitle;
-        Latitude = newLat;
-        Longitude = newLon;
+        Connector = newConnector;
+        MaxPowerKw = newMaxPowerKw;
+        PricePerKwh = newPricePerKwh;
 
         AddDomainEvent(new PointUpdatedEvent(
             PointId: this.Id,
             NewTitle: this.Title,
+            NewConnector: this.Connector,
+            NewMaxPowerKw: this.MaxPowerKw,
+            NewPricePerKwh: this.PricePerKwh,
+            Latitude: this.Latitude,
+            Longitude: this.Longitude,
+            OccurredOn: DateTime.UtcNow
+        ));
+    }
+
+    public void Deactivate()
+    {
+        if (Status == ChargerStatus.Occupied)
+            throw new InvalidOperationException("Não é possível desativar um ponto com sessão de recarga ativa.");
+
+        Status = ChargerStatus.Deactivated;
+
+        AddDomainEvent(new PointDeactivatedEvent(
+            PointId: this.Id,
+            HostId: this.HostId,
+            Latitude: this.Latitude,
+            Longitude: this.Longitude,
             OccurredOn: DateTime.UtcNow
         ));
     }

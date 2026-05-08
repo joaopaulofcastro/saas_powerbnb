@@ -8,6 +8,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SaaS.PowerBnB.Api.Infrastructure.Auth;
 using SaaS.PowerBnB.Modules.Charging;
+using SaaS.PowerBnB.Modules.Financial;
+using SaaS.PowerBnB.Modules.Identity;
 using SaaS.PowerBnB.SharedKernel.Application.Interfaces;
 using SaaS.PowerBnB.SharedKernel.Behaviors;
 using SaaS.PowerBnB.SharedKernel.Endpoints;
@@ -118,6 +120,8 @@ builder.Services.AddMediatR(cfg => {
 
 // 5. Configuração dos módulos
 builder.Services.AddChargingModule(builder.Configuration);
+builder.Services.AddIdentityModule(builder.Configuration);
+builder.Services.AddFinancialModule(builder.Configuration);
 
 
 var app = builder.Build();
@@ -134,6 +138,8 @@ app.UseAuthorization();
 
 //Utilização dos módulos
 app.UseChargingModule();
+app.UseIdentityModule();
+app.UseFinancialModule();
 
 //Método de extensão que mapeia os endpoints registrados nos módulos
 app.MapEndpoints();
